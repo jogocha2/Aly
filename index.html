@@ -53,6 +53,7 @@
       align-items: center;
       gap: 6px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      z-index: 10;
     }
     .monogram {
       font-family: 'Great Vibes', cursive;
@@ -139,13 +140,50 @@
       background: #25d366;
       color: #ffffff;
     }
+    /* Pantalla de bienvenida para desbloquear el audio */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(27, 54, 93, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      transition: opacity 0.6s ease;
+    }
+    .open-btn {
+      background: var(--gold-primary);
+      color: #fff;
+      border: none;
+      padding: 15px 35px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+      margin-top: 20px;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 1px;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Cortina para garantizar reproducción con sonido -->
+  <div id="overlay">
+    <div style="font-family: 'Great Vibes', cursive; font-size: 3rem; color: var(--gold-primary); margin-bottom: 10px;">Mis 15 Años</div>
+    <div style="font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 20px;">ALYSSON VALERIA</div>
+    <button class="open-btn" onclick="startExperience()">✉️ Abrir Invitación</button>
+  </div>
+
   <div class="invitation-card">
     <button class="music-btn" id="musicBtn" onclick="toggleAudio()">
-      <span id="musicIcon">▶</span> <span id="musicText">Música</span>
+      <span id="musicIcon">⏸</span> <span id="musicText">Pausar</span>
     </button>
 
     <div class="monogram">a</div>
@@ -172,28 +210,49 @@
     </div>
   </div>
 
-  <!-- Reproduce el archivo subido si está en la misma carpeta con el nombre musica.mp3 -->
-  <audio id="bgAudio" src="musica.mp3" loop preload="auto"></audio>
+  <!-- Apunta exactamente al nombre music.mp3 que tienes en tu repositorio -->
+  <audio id="bgAudio" src="music.mp3" loop preload="auto"></audio>
 
   <script>
     const audio = document.getElementById('bgAudio');
     const musicIcon = document.getElementById('musicIcon');
     const musicText = document.getElementById('musicText');
+    const overlay = document.getElementById('overlay');
+
+    function startExperience() {
+      audio.play().then(() => {
+        musicIcon.textContent = '⏸';
+        musicText.textContent = 'Pausar';
+      }).catch(err => {
+        console.log("No se pudo iniciar automáticamente:", err);
+      });
+
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 600);
+    }
 
     function toggleAudio() {
       if (audio.paused) {
-        audio.play().then(() => {
-          musicIcon.textContent = '⏸';
-          musicText.textContent = 'Pausar';
-        }).catch(err => {
-          console.log('Error de reproducción:', err);
-        });
+        audio.play();
+        musicIcon.textContent = '⏸';
+        musicText.textContent = 'Pausar';
       } else {
         audio.pause();
         musicIcon.textContent = '▶';
         musicText.textContent = 'Música';
       }
     }
+
+    // Respaldo adicional: si tocan cualquier parte de la pantalla, arranca el sonido
+    document.addEventListener('click', function unlockAudio() {
+      if (audio.paused && overlay.style.display === 'none') {
+        audio.play();
+        musicIcon.textContent = '⏸';
+        musicText.textContent = 'Pausar';
+      }
+    }, { once: true });
   </script>
 </body>
 </html>
