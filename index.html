@@ -85,7 +85,7 @@
     .date-row {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.5rem;
-      margin: 20px 0 5px;
+      margin: 15px 0 5px;
     }
     .date-num {
       font-size: 3rem;
@@ -95,11 +95,54 @@
     }
     .time {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 600;
       letter-spacing: 2px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
+
+    /* Estilos de la Cuenta Regresiva */
+    .countdown-container {
+      margin: 20px 0 25px;
+      padding: 15px 10px;
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid rgba(203, 161, 53, 0.25);
+      box-shadow: 0 4px 15px rgba(27, 54, 93, 0.05);
+    }
+    .countdown-title {
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue-soft);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .countdown-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .countdown-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      line-height: 1;
+    }
+    .countdown-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: #666;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
     .location-box {
       background: rgba(112, 148, 183, 0.08);
       border-radius: 12px;
@@ -140,11 +183,12 @@
       background: #25d366;
       color: #ffffff;
     }
-    /* Pantalla de bienvenida para desbloquear el audio */
+
+    /* Pantalla inicial para habilitar música */
     #overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(27, 54, 93, 0.88);
+      background: rgba(27, 54, 93, 0.92);
       backdrop-filter: blur(8px);
       z-index: 999;
       display: flex;
@@ -174,7 +218,6 @@
 </head>
 <body>
 
-  <!-- Cortina para garantizar reproducción con sonido -->
   <div id="overlay">
     <div style="font-family: 'Great Vibes', cursive; font-size: 3rem; color: var(--gold-primary); margin-bottom: 10px;">Mis 15 Años</div>
     <div style="font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 20px;">ALYSSON VALERIA</div>
@@ -195,6 +238,29 @@
     </div>
     <div class="time">08:30 P.M.</div>
 
+    <!-- Módulo de Cuenta Regresiva -->
+    <div class="countdown-container">
+      <div class="countdown-title">Faltan tan solo</div>
+      <div class="countdown-grid">
+        <div class="countdown-item">
+          <span class="countdown-number" id="days">00</span>
+          <span class="countdown-label">Días</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-number" id="hours">00</span>
+          <span class="countdown-label">Horas</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-number" id="minutes">00</span>
+          <span class="countdown-label">Min</span>
+        </div>
+        <div class="countdown-item">
+          <span class="countdown-number" id="seconds">00</span>
+          <span class="countdown-label">Seg</span>
+        </div>
+      </div>
+    </div>
+
     <div class="location-box">
       <div class="location-title">SALÓN DE RECEPCIONES HACIENDA ALESSA</div>
       <div class="address">Av. Los Ciruelos Nro 361 - San Juan de Lurigancho</div>
@@ -210,7 +276,6 @@
     </div>
   </div>
 
-  <!-- Apunta exactamente al nombre music.mp3 que tienes en tu repositorio -->
   <audio id="bgAudio" src="music.mp3" loop preload="auto"></audio>
 
   <script>
@@ -224,7 +289,7 @@
         musicIcon.textContent = '⏸';
         musicText.textContent = 'Pausar';
       }).catch(err => {
-        console.log("No se pudo iniciar automáticamente:", err);
+        console.log("Audio en espera de interacción manual:", err);
       });
 
       overlay.style.opacity = '0';
@@ -245,14 +310,31 @@
       }
     }
 
-    // Respaldo adicional: si tocan cualquier parte de la pantalla, arranca el sonido
-    document.addEventListener('click', function unlockAudio() {
-      if (audio.paused && overlay.style.display === 'none') {
-        audio.play();
-        musicIcon.textContent = '⏸';
-        musicText.textContent = 'Pausar';
+    // Lógica de Cuenta Regresiva
+    const targetDate = new Date("2026-11-28T20:30:00").getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        document.getElementById('days').innerText = String(days).padStart(2, '0');
+        document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+        document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+      } else {
+        document.querySelector('.countdown-container').innerHTML = 
+          "<div style='color: var(--gold-dark); font-weight: 600; padding: 10px;'>¡Hoy es el gran día! 🎉</div>";
       }
-    }, { once: true });
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
   </script>
 </body>
 </html>
